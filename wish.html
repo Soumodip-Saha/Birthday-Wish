@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Birthday Wish</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            overflow: hidden;
+            background-color: #2f3640;
+            color: white;
+            transition: background-color 0.5s;
+        }
+
+        .container {
+            z-index: 10;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 40px;
+            border-radius: 15px;
+            backdrop-filter: blur(5px);
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 1.5rem;
+        }
+
+        /* Countdown styling */
+        #timer {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #fbc531;
+            margin-top: 20px;
+        }
+
+        /* Celebration specific styles */
+        .disco-mode {
+            animation: disco 2s infinite;
+        }
+
+        @keyframes disco {
+            0% {
+                background-color: #ff4757;
+            }
+
+            25% {
+                background-color: #1e90ff;
+            }
+
+            50% {
+                background-color: #2ed573;
+            }
+
+            75% {
+                background-color: #ffa502;
+            }
+
+            100% {
+                background-color: #ff4757;
+            }
+        }
+
+        /* Balloons */
+        .balloon {
+            position: absolute;
+            bottom: -100px;
+            font-size: 4rem;
+            animation: floatUp 8s ease-in-out infinite;
+            opacity: 0.8;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0) rotate(-5deg);
+            }
+
+            50% {
+                transform: translateY(-60vh) rotate(5deg);
+            }
+
+            100% {
+                transform: translateY(-120vh) rotate(-5deg);
+            }
+        }
+
+        /* Views */
+        #countdown-view,
+        #celebration-view,
+        #over-view {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="countdown-view" class="container">
+        <h1>Hold on, <span class="rx-name"></span>!</h1>
+        <p>Your birthday isn't here yet. Please wait until then.</p>
+        <div id="timer"></div>
+    </div>
+
+    <div id="celebration-view" class="container">
+        <h1>🎂 Happy Birthday, <span class="rx-name"></span>! 🎈</h1>
+        <p id="random-wish"></p>
+        <p><em>— Sent with love from <span class="sx-name"></span></em></p>
+    </div>
+
+    <div id="over-view" class="container">
+        <h1>Oh no!</h1>
+        <p>Your Birthday Is Over, <span class="rx-name"></span>.</p>
+        <p>See you next year!</p>
+    </div>
+
+    <script>
+        // 1. Get URL Parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const sender = urlParams.get('sender') || 'Someone';
+        const receiver = urlParams.get('receiver') || 'Friend';
+        const bdayDateStr = urlParams.get('date');
+
+        // Populate names in HTML
+        document.querySelectorAll('.rx-name').forEach(el => el.innerText = receiver);
+        document.querySelectorAll('.sx-name').forEach(el => el.innerText = sender);
+
+        // 2. Date Logic
+        if (!bdayDateStr) {
+            document.body.innerHTML = "<h2>Error: No date provided in link.</h2>";
+        } else {
+            const targetDate = new Date(bdayDateStr);
+            targetDate.setHours(0, 0, 0, 0); // Normalize to midnight
+
+            function checkDate() {
+                const now = new Date();
+                const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+                if (today.getTime() < targetDate.getTime()) {
+                    // Future: Show Countdown
+                    document.getElementById('countdown-view').style.display = 'block';
+                    updateTimer(targetDate);
+                } else if (today.getTime() === targetDate.getTime()) {
+                    // Today: Celebrate!
+                    document.getElementById('countdown-view').style.display = 'none';
+                    document.getElementById('celebration-view').style.display = 'block';
+                    triggerCelebration();
+                } else {
+                    // Past: Over
+                    document.getElementById('countdown-view').style.display = 'none';
+                    document.getElementById('celebration-view').style.display = 'none';
+                    document.getElementById('over-view').style.display = 'block';
+                }
+            }
+
+            // 3. Countdown Timer Function
+            function updateTimer(target) {
+                setInterval(() => {
+                    const now = new Date().getTime();
+                    const distance = target.getTime() - now;
+
+                    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                    document.getElementById('timer').innerText =
+                        `${days}d ${hours}h ${minutes}m ${seconds}s`;
+                }, 1000);
+            }
+
+            // 4. Celebration Function (Wishes, Disco, Fireworks)
+            let hasCelebrated = false;
+            function triggerCelebration() {
+                if (hasCelebrated) return;
+                hasCelebrated = true;
+
+                // Randomized Wishes
+                const wishes = [
+                    "Wishing you a day filled with happiness and a year filled with joy!",
+                    "Hope your special day brings you all that your heart desires!",
+                    "May your birthday be as amazing and awesome as you are!",
+                    "Another adventure filled year awaits you. Welcome it by celebrating your birthday with pomp and splendor!",
+                    "Count your life by smiles, not tears. Count your age by friends, not years. Happy birthday!"
+                ];
+                const randomWish = wishes[Math.floor(Math.random() * wishes.length)];
+                document.getElementById('random-wish').innerText = randomWish;
+
+                // Turn on Disco Mode
+                document.body.classList.add('disco-mode');
+
+                // Add Balloons dynamically
+                const balloonEmojis = ['🎈', '🎁', '🍰', '✨'];
+                for (let i = 0; i < 10; i++) {
+                    let balloon = document.createElement('div');
+                    balloon.className = 'balloon';
+                    balloon.innerText = balloonEmojis[Math.floor(Math.random() * balloonEmojis.length)];
+                    balloon.style.left = Math.random() * 100 + 'vw';
+                    balloon.style.animationDelay = Math.random() * 5 + 's';
+                    document.body.appendChild(balloon);
+                }
+
+                // Fireworks Loop using canvas-confetti
+                let duration = 15 * 1000; // 15 seconds of fireworks
+                let animationEnd = Date.now() + duration;
+                let defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+                function randomInRange(min, max) {
+                    return Math.random() * (max - min) + min;
+                }
+
+                let interval = setInterval(function () {
+                    let timeLeft = animationEnd - Date.now();
+
+                    if (timeLeft <= 0) {
+                        return clearInterval(interval);
+                    }
+
+                    let particleCount = 50 * (timeLeft / duration);
+                    // Fire from two sources
+                    confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+                    confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+                }, 250);
+            }
+
+            // Initialize
+            checkDate();
+        }
+    </script>
+
+</body>
+
+</html>

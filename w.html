@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Birthday Link Generator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f8ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        input {
+            width: 90%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #ff4757;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background-color: #ff6b81;
+        }
+
+        #linkBox {
+            margin-top: 20px;
+            padding: 15px;
+            background: #eccc68;
+            border-radius: 6px;
+            display: none;
+            word-wrap: break-word;
+        }
+
+        a {
+            color: #2f3542;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h2>🎂 Create a Birthday Wish</h2>
+        <form id="bdayForm">
+            <input type="text" id="senderName" placeholder="Your Name" required>
+            <input type="text" id="receiverName" placeholder="Who is the birthday for?" required>
+            <input type="date" id="bdayDate" required>
+            <button type="submit">Generate Magic Link</button>
+        </form>
+
+        <div id="linkBox">
+            <p>Share this link with them!</p>
+            <a id="generatedLink" href="#" target="_blank">Click here to preview</a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('bdayForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const sender = encodeURIComponent(document.getElementById('senderName').value);
+            const receiver = encodeURIComponent(document.getElementById('receiverName').value);
+            const date = encodeURIComponent(document.getElementById('bdayDate').value);
+
+            // Construct the URL to the second page
+            const currentPath = window.location.href.split('index.html')[0];
+            let baseURL = currentPath.endsWith('/') ? currentPath : currentPath + '/';
+            // If testing locally without a server, window.location.href might just be the file path
+            if (!window.location.href.includes('index.html')) {
+                baseURL = window.location.href + (window.location.href.endsWith('/') ? '' : '/');
+            }
+
+            const finalUrl = `${baseURL}birthday.html?sender=${sender}&receiver=${receiver}&date=${date}`;
+
+            const linkEl = document.getElementById('generatedLink');
+            linkEl.href = finalUrl;
+            linkEl.innerText = finalUrl;
+
+            document.getElementById('linkBox').style.display = 'block';
+        });
+    </script>
+
+</body>
+
+</html>
